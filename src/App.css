@@ -1,38 +1,59 @@
-.App {
-  text-align: center;
+body{
+    width: 1024px;
+    margin: 0 auto;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.todo-table{
+    width:100%;
+    border-collapse: collapse;
+    border: 1px solid;
+}
+.todo-table td{
+    cursor: pointer;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.todo-table__sno{
+    text-align: right;
+    width:50px;
+    border: 1px solid;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.todo-table__name{
+    text-align: left;
+    border: 1px solid;
 }
 
-.App-link {
-  color: #61dafb;
+.selected{
+    background: #444444;
+    color: #ffffff
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button{
+    margin: 10px 0;
+    padding: 1px 10px;
+    border: 1px solid;
+    cursor: pointer;
+    min-width: 40px;
+}
+
+.secondary{
+    background: #ffffff;
+}
+
+.primary{
+    background: #444444;
+    color : #fff;
+}
+
+.right{
+    float: right;
+}
+
+.right::after{
+    content: '';
+    clear: both;
+}
+
+.todo-input{
+    margin: 10px 0 0 0;
 }
