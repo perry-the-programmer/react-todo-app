@@ -90,6 +90,20 @@ function TodoList() {
     return todoToBeUpdated;
   }
 
+  const deleteTodo = () => {
+    const code = state.selected.code;
+    const name = state.selected.name;
+    const deletedTodo = { code, name };
+    setState(oldState => {
+      const remainingTodos=oldState.todos.filter(item => item.code !== code)
+      return ({
+        ...oldState,
+        todos: [...remainingTodos]
+      })
+    })
+    return deletedTodo;
+  }
+
   const handleClick = todo => (e) => {
     if (state.mode === 'view') updateSelected(todo);
   }
@@ -115,6 +129,16 @@ function TodoList() {
     viewMode(updatedTodo);
   }
 
+  const deleteIt = () => {
+    if (!state.selected.name) return;
+    if (state.mode !== 'delete') {
+      updateMode('delete');
+      return;
+    }
+    deleteTodo();
+    viewMode();
+  }
+
   const clearSelection = () => {
     viewMode();
   }
@@ -128,7 +152,7 @@ function TodoList() {
     <>
       <div className='todo-wrapper'>
         <form onSubmit={(e) => { e.preventDefault() }}>
-          <button onClick={clearSelection} className='secondary button right'> Clear </button>
+          <button onClick={clearSelection} className='secondary button right'> Cancel </button>
           {state.mode === 'add' &&
             <div>
               <input
@@ -166,6 +190,13 @@ function TodoList() {
             disabled={shouldDisable('edit')}
           >
             {state.mode === 'edit' ? 'Update' : 'Edit'}
+          </button>
+          <button
+            onClick={deleteIt}
+            className='primary button'
+            disabled={shouldDisable('delete')}
+          >
+          {state.mode === 'delete' ? 'Delete selected' : 'Delete'}
           </button>
         </form>
         <table className='todo-table'>
