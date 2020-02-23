@@ -27,6 +27,7 @@ function TodoList() {
     name: 'some three'
   }
   ];
+
   const [state, setState] = useState({
     todos: dummyData,
     selected: {},
@@ -34,6 +35,13 @@ function TodoList() {
     inputTodoName: ''
   })
 
+  const shouldDisable = (buttonKey) => {
+    return state.mode !== 'view' && state.mode !== buttonKey
+  }
+
+  const nextSequence = () => {
+    return (state.todos.length + 1);
+  }
   const updateSelected = (selected) => {
     setState(oldState => {
       return ({
@@ -42,6 +50,7 @@ function TodoList() {
       })
     })
   }
+
   const updateMode = (mode) => {
     setState(oldState => {
       return ({
@@ -51,19 +60,9 @@ function TodoList() {
     })
   }
 
-  const updateInputTodo = (inputTodoName)=>{
-    setState(oldState => {
-      return ({
-        ...oldState,
-        inputTodoName
-      })
-    })
-    
-  }
-
   const addTodo = (name) => {
     const code = nextSequence();
-    const todoToBeAdded = {code,name};
+    const todoToBeAdded = { code, name };
     setState(oldState => {
       return ({
         ...oldState,
@@ -75,38 +74,39 @@ function TodoList() {
     return todoToBeAdded;
   }
 
-
   const updateTodo = () => {
     const code = state.selected.code;
-    const name = state.inputTodoName;
-    const todoToBeUpdated = {code,name};
+    const name = state.selected.name;
+    const todoToBeUpdated = { code, name };
     setState(oldState => {
+      oldState.todos.forEach((item) => {
+        item.code === code && (item.name = name)
+      })
       return ({
         ...oldState,
-        todos: [...oldState.todos, {
-          ...todoToBeUpdated
-        }]
+        todos: [...oldState.todos]
       })
     })
     return todoToBeUpdated;
   }
 
   const handleClick = todo => (e) => {
-    updateSelected(todo);
+    if (state.mode === 'view') updateSelected(todo);
   }
 
   const add = () => {
     if (state.mode !== 'add') {
+      clearSelection();
       updateMode('add');
+
       return;
     }
-    const addedTodo = addTodo(state.inputTodoName);
+    const addedTodo = addTodo(state.selected.name);
     viewMode(addedTodo);
   }
 
-
   const edit = () => {
-    if(!state.selected.name) return;
+    if (!state.selected.name) return;
     if (state.mode !== 'edit') {
       updateMode('edit');
       return;
@@ -114,7 +114,6 @@ function TodoList() {
     const updatedTodo = updateTodo();
     viewMode(updatedTodo);
   }
-
 
   const clearSelection = () => {
     viewMode();
@@ -124,41 +123,72 @@ function TodoList() {
     updateSelected(selected);
     updateMode('view');
   }
+
   return (
     <>
-      <table className='todo-table'>
-        <thead><tr>
-          <th className='todo-table__sno'>Sno.</th>
-          <th className='todo-table__name'>Name</th>
-        </tr>
-        </thead>
-        <tbody>
-        {state.todos.map((todo, index) => (
-          <tr
-            onClick={handleClick(todo)}
-            className={state.selected.name === todo.name ? 'selected':undefined}
-            key={todo.code}
+      <div className='todo-wrapper'>
+        <form onSubmit={(e) => { e.preventDefault() }}>
+          <button onClick={clearSelection} className='secondary button right'> Clear </button>
+          {state.mode === 'add' &&
+            <div>
+              <input
+                autoFocus
+                className='todo-input'
+                type='text'
+                value={state.selected.name}
+                onChange={e => {
+                  updateSelected({ name: e.target.value });
+                }} />
+            </div>}
+          {state.mode === 'edit' && <div>
+            <span>Code : {state.selected.code}</span>
+            <input
+              autoFocus
+              className='todo-input'
+              type='text'
+              value={state.selected.name}
+              onChange={e => {
+                updateSelected({
+                  code: state.selected.code,
+                  name: e.target.value
+                });
+              }}
+            />
+          </div>}
+          <button
+            onClick={add}
+            className='primary button'
+            disabled={shouldDisable('add')}
+          > Add </button>
+          <button
+            onClick={edit}
+            className='primary button'
+            disabled={shouldDisable('edit')}
           >
-            <td className='todo-table__sno'>{index + 1}</td>
-            <td className='todo-table__name'>{todo.name}</td>
+            {state.mode === 'edit' ? 'Update' : 'Edit'}
+          </button>
+        </form>
+        <table className='todo-table'>
+          <thead><tr>
+            <th className='todo-table__sno'>Sno.</th>
+            <th className='todo-table__name'>Name</th>
           </tr>
-        ))}
-        </tbody>
-      </table>
-      <button onClick={clearSelection} className='secondary button right'> Clear </button>
-      {state.mode === 'add' && <div><input className='todo-input' type='text' onChange={e => { updateInputTodo(e.target.value) }} /></div>}
-      {state.mode === 'edit' && <div>
-        <span>Code : {state.selected.code}</span>
-        <input className='todo-input' type='text' value={state.selected.name} onChange={e => { updateInputTodo(e.target.value) }} />
-        </div>}
-      <button onClick={add} className='primary button'> Add </button>
-      <button onClick={edit} className='primary button'> {state.mode === 'edit' ? 'Update':'Edit'} </button>
-
+          </thead>
+          <tbody>
+            {state.todos.map((todo, index) => (
+              <tr
+                onClick={handleClick(todo)}
+                className={state.selected.code === todo.code ? 'selected' : undefined}
+                key={todo.code}
+              >
+                <td className='todo-table__sno'>{index + 1}</td>
+                <td className='todo-table__name'>{todo.name}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   )
-
-  function nextSequence() {
-    return (state.todos.length + 1);
-  }
 }
 export default App;
