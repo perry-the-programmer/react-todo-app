@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+
+const BASE_URL = "http://localhost:9101";
+const ALL_TODOS_URI = "/"
 
 function App() {
   const appName = "Todo builder";
@@ -14,26 +16,28 @@ function App() {
   );
 }
 function TodoList() {
-  let dummyData = [{
-    code: 1,
-    name: 'some one'
-  },
-  {
-    code: 2,
-    name: 'some two'
-  },
-  {
-    code: 3,
-    name: 'some three'
-  }
-  ];
 
   const [state, setState] = useState({
-    todos: dummyData,
+    todos: [],
     selected: {},
     mode: 'view',
     inputTodoName: ''
   })
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      const res = await fetch(BASE_URL + ALL_TODOS_URI,
+        {
+          method: 'GET',
+          mode: 'cors',
+          Accept: 'application/json'
+        }
+      );
+      const json = await res.json();
+      setState(oldState => ({ ...oldState, todos: json }));
+    }
+    fetchTodos()
+  }, [])
 
   const shouldDisable = (buttonKey) => {
     return state.mode !== 'view' && state.mode !== buttonKey
@@ -42,6 +46,7 @@ function TodoList() {
   const nextSequence = () => {
     return (state.todos.length + 1);
   }
+
   const updateSelected = (selected) => {
     setState(oldState => {
       return ({
@@ -95,7 +100,7 @@ function TodoList() {
     const name = state.selected.name;
     const deletedTodo = { code, name };
     setState(oldState => {
-      const remainingTodos=oldState.todos.filter(item => item.code !== code)
+      const remainingTodos = oldState.todos.filter(item => item.code !== code)
       return ({
         ...oldState,
         todos: [...remainingTodos]
@@ -196,7 +201,7 @@ function TodoList() {
             className='primary button'
             disabled={shouldDisable('delete')}
           >
-          {state.mode === 'delete' ? 'Delete selected' : 'Delete'}
+            {state.mode === 'delete' ? 'Delete selected' : 'Delete'}
           </button>
         </form>
         <table className='todo-table'>
